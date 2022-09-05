@@ -708,11 +708,14 @@ class RunCompute extends StreamlitComponentBase<State> {
       if (theme) {
         // Use the theme object to style our button border. Alternatively, the
         // theme style is defined in CSS vars.
-        const borderStyling = `1px solid ${
+        const borderStyling = `0px solid ${
           this.state.isFocused ? theme.primaryColor : "gray"
         }`
         style.border = borderStyling
         style.outline = borderStyling
+        style.backgroundColor = "#3388FF"//"#FF4B4B"
+        style.color = "white"
+        style.borderRadius = "0.2rem"
       }
 
       // Show a button and some text.

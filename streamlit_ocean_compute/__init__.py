@@ -24,7 +24,7 @@ config = Config('./streamlit_ocean_compute/config.ini')
 ocean = Ocean(config)
 # st.write(f"Ocean network: {ocean.config.network_url}")
 
-_ocean_data = components.declare_component("ocean_data", url="http://localhost:3002/")
+_ocean_data = components.declare_component("ocean_data", url="http://localhost:3003/")
 def ocean_data(label, did="", key=None, user_address=None, dt_did=None, alg_did=None):
     """
     Wallet Connect component.
