@@ -1,4 +1,4 @@
-# 🌊 Streamlit Ocean Compute component
+# 🐟 Streamlit Ocean Compute component
 
 This repository contains the code behind Algovera's Streamlit Ocean Compute component that you can use to run Ocean's compute-to-data from Streamlit apps.
 
