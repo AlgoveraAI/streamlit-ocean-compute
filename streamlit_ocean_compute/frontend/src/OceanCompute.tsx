@@ -29,11 +29,11 @@ import {
   ProviderFees,
   ProviderInstance,
  } from "@oceanprotocol/lib"
-import { List } from "lodash"
 
 interface State {
     computeJobId: any
     computeStatus: any
+    computeResults: any
     isFocused: boolean
 }
   
@@ -710,15 +710,34 @@ async function getComputeStatus(computeJobId: any, dataDid: any) {
   // assert(jobStatus, 'Cannot retrieve compute status!')
   console.log(jobStatus)
   return jobStatus[0].statusText
-
 }
-    
+
+async function getResults(computeJobId: any) {
+  console.log("Getting results")
+  const config: any = await getTestConfig(web3)
+  const accounts = await window.ethereum.request({
+    method: 'eth_requestAccounts',
+  });
+  console.log("accounts", accounts)
+  const consumerAccount = accounts[0]
+  const providerUrl = config.providerUri
+  const downloadURL = await ProviderInstance.getComputeResultUrl(
+    providerUrl,
+    web3,
+    consumerAccount,
+    computeJobId,
+    0
+  )
+
+  console.log(`Compute results URL: ${downloadURL}`)
+}
+     
   /**
    * This is a React-based component template. The `render()` function is called
    * automatically when your component should be re-rendered.
    */
 class RunCompute extends StreamlitComponentBase<State> {
-  public state = { computeJobId: "No compute job", computeStatus: "No Status", isFocused: false }
+  public state = { computeJobId: "No compute job", computeStatus: "No Status", computeResults: "No Compute Results", isFocused: false }
 
     public render = (): ReactNode => {
       // Arguments that are passed to the plugin in Python are accessible
@@ -772,11 +791,17 @@ class RunCompute extends StreamlitComponentBase<State> {
           () => Streamlit.setComponentValue(this.state.computeJobId)
         )
       } else if (this.props.args["key"] === "status") {
-          const status: any = await getComputeStatus(this.props.args["job_id"], this.props.args["data_did"])
-          this.setState(
+        const status: any = await getComputeStatus(this.props.args["job_id"], this.props.args["data_did"])
+        this.setState(
             () => ({ computeStatus: status }),
             () => Streamlit.setComponentValue(this.state.computeStatus)
-          )
+        )
+      } else if (this.props.args["key"] === "results") {
+        const results: any = await getResults(this.props.args["job_id"])
+        this.setState(
+          () => ({ computeResults: results }),
+          () => Streamlit.setComponentValue(this.state.computeResults)
+      )
       }
       // Increment state.numClicks, and pass the new value back to
       // Streamlit via `Streamlit.setComponentValue`.
