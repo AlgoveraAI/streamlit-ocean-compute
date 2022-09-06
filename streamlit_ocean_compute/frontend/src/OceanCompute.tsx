@@ -29,6 +29,7 @@ import {
   ProviderFees,
   ProviderInstance,
  } from "@oceanprotocol/lib"
+import { List } from "lodash"
 
 interface State {
     computeJobId: any
@@ -690,23 +691,25 @@ async function runCompute(dataDid: string, algoDid: string , userAddress: string
 
 }
 
-async function getComputeStatus(computeJobId: any, DATASET_DDO: any) {
+async function getComputeStatus(computeJobId: any, dataDid: any) {
+  const config: any = await getTestConfig(web3)
+  const aquarius = new Aquarius(config.metadataCacheUri)
+  // const resolvedDdoWith1mTimeout = await aquarius.waitForAqua(dataDid);
   const accounts = await window.ethereum.request({
     method: 'eth_requestAccounts',
   });
   console.log("accounts", accounts)
   const consumerAccount = accounts[0]
-  const config: any = await getTestConfig(web3)
   const providerUrl = config.providerUri
-  const jobStatus = await ProviderInstance.computeStatus(
+  const jobStatus: any = await ProviderInstance.computeStatus(
     providerUrl,
     consumerAccount,
     computeJobId,
-    DATASET_DDO.id
+    dataDid// DATASET_DDO.id
   )
   // assert(jobStatus, 'Cannot retrieve compute status!')
   console.log(jobStatus)
-  return jobStatus
+  return jobStatus[0].statusText
 
 }
     
@@ -769,17 +772,11 @@ class RunCompute extends StreamlitComponentBase<State> {
           () => Streamlit.setComponentValue(this.state.computeJobId)
         )
       } else if (this.props.args["key"] === "status") {
-        if (this.state.computeJobId !== "No compute job") {
-          const status: any = await getComputeStatus(this.state.computeJobId[0], this.state.computeJobId[1])
+          const status: any = await getComputeStatus(this.props.args["job_id"], this.props.args["data_did"])
           this.setState(
             () => ({ computeStatus: status }),
             () => Streamlit.setComponentValue(this.state.computeStatus)
           )
-        } else {
-          const status: any = "You need to start a compute job first"
-          console.log("You need to start a compute job first")
-          console.log("Compute Job state is ", this.state.computeJobId)
-        }
       }
       // Increment state.numClicks, and pass the new value back to
       // Streamlit via `Streamlit.setComponentValue`.
