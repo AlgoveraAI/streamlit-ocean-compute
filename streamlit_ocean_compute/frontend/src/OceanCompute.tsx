@@ -730,6 +730,7 @@ async function getResults(computeJobId: any) {
   )
 
   console.log(`Compute results URL: ${downloadURL}`)
+  return downloadURL
 }
      
   /**

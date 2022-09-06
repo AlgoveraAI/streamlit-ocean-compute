@@ -53,3 +53,4 @@ if data_did and algo_did:
     ocean_compute_button2 = ocean_data(label="ocean_compute2", key="status", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Check Status", color="#A44CD3", job_id=job_id)
     st.write(f"Compute Status is: {ocean_compute_button2}")
     ocean_compute_button3 = ocean_data(label="ocean_compute3", key="results", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Get Results", color="#77C063")
+    st.write(f"Compute Results available here: {ocean_compute_button3}")
