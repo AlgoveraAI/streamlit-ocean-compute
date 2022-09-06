@@ -29,6 +29,7 @@ import {
   ProviderFees,
   ProviderInstance,
  } from "@oceanprotocol/lib"
+import assert from "assert"
 
 interface State {
     computeResult: any
@@ -682,9 +683,29 @@ async function runCompute(dataDid: string, algoDid: string , userAddress: string
   const computeJobId = computeJobs[0].jobId
 
   console.log("computeJobId", computeJobId)
+  return [computeJobId, resolvedDdoWith1mTimeout]
   }
 
   }
+
+}
+
+async function getComputeStatus(computeJobId: any, DATASET_DDO: any) {
+  const accounts = await window.ethereum.request({
+    method: 'eth_requestAccounts',
+  });
+  console.log("accounts", accounts)
+  const consumerAccount = accounts[0]
+  const config: any = await getTestConfig(web3)
+  const providerUrl = config.providerUri
+  const jobStatus = await ProviderInstance.computeStatus(
+    providerUrl,
+    consumerAccount,
+    computeJobId,
+    DATASET_DDO.id
+  )
+  // assert(jobStatus, 'Cannot retrieve compute status!')
+  console.log(jobStatus)
 
 }
     
@@ -714,11 +735,11 @@ class RunCompute extends StreamlitComponentBase<State> {
         }`
         style.border = borderStyling
         style.outline = borderStyling
-        style.backgroundColor = "#3388FF"//"#FF4B4B"
+        style.backgroundColor = this.props.args["color"] //"#FF4B4B"
         style.color = "white"
         style.borderRadius = "0.2rem"
       }
-
+      const message = this.props.args["message"]
       // Show a button and some text.
       // When the button is clicked, we'll increment our "numClicks" state
       // variable, and send its new value back to Streamlit, where it'll
@@ -732,7 +753,7 @@ class RunCompute extends StreamlitComponentBase<State> {
             onFocus={this._onFocus}
             onBlur={this._onBlur}
           >
-            Run Compute
+            {message}
           </button>
         </span>
       )
