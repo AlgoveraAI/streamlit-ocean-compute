@@ -46,7 +46,8 @@ data_did = st.text_input("Data DID: ", "")
 algo_did = st.text_input("Algorithm DID: ", "")
 
 if data_did and algo_did:
-    ocean_compute_button = ocean_data(label="ocean_compute", key=algo_did, user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Run Compute", color="#3388FF")
+    ocean_compute_button = ocean_data(label="ocean_compute", key="c2d", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Run Compute", color="#3388FF")
     if isinstance(ocean_compute_button, list):
         st.write(f"Compute started with job ID: {ocean_compute_button[0]}")
-    ocean_compute_button2 = ocean_data(label="ocean_compute2", key="algo_did", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Check Status", color="#A44CD3")
+    ocean_compute_button2 = ocean_data(label="ocean_compute2", key="status", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Check Status", color="#A44CD3")
+    ocean_compute_button3 = ocean_data(label="ocean_compute3", key="results", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Get Results", color="#77C063")
