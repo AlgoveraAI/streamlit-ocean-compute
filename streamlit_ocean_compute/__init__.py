@@ -25,11 +25,11 @@ ocean = Ocean(config)
 # st.write(f"Ocean network: {ocean.config.network_url}")
 
 _ocean_data = components.declare_component("ocean_data", url="http://localhost:3003/")
-def ocean_data(label, did="", key=None, user_address=None, dt_did=None, alg_did=None, message="Run Compute", color="#3388FF"):
+def ocean_data(label, did="", key=None, user_address=None, dt_did=None, alg_did=None, message="Run Compute", color="#3388FF", job_id="None"):
     """
     Wallet Connect component.
     """
-    return _ocean_data(label=label, did=did, default="", key=key, user_address=user_address, data_did=dt_did, algo_did=alg_did, message=message, color=color)
+    return _ocean_data(label=label, did=did, default="", key=key, user_address=user_address, data_did=dt_did, algo_did=alg_did, message=message, color=color, job_id=job_id)
 
 
 results = None
@@ -49,5 +49,7 @@ if data_did and algo_did:
     ocean_compute_button = ocean_data(label="ocean_compute", key="c2d", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Run Compute", color="#3388FF")
     if isinstance(ocean_compute_button, list):
         st.write(f"Compute started with job ID: {ocean_compute_button[0]}")
-    ocean_compute_button2 = ocean_data(label="ocean_compute2", key="status", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Check Status", color="#A44CD3")
+    job_id = st.text_input("Compute Job ID: ", "")
+    ocean_compute_button2 = ocean_data(label="ocean_compute2", key="status", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Check Status", color="#A44CD3", job_id=job_id)
+    st.write(f"Compute Status is: {ocean_compute_button2}")
     ocean_compute_button3 = ocean_data(label="ocean_compute3", key="results", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Get Results", color="#77C063")

@@ -29,10 +29,10 @@ import {
   ProviderFees,
   ProviderInstance,
  } from "@oceanprotocol/lib"
-import assert from "assert"
 
 interface State {
     computeJobId: any
+    computeStatus: any
     isFocused: boolean
 }
   
@@ -410,7 +410,7 @@ async function handleOrder(
           config,
           payerAccount,
           order.providerFee.providerFeeToken,
-          payerAccount,
+          datatokenAddress,
           order.providerFee.providerFeeAmount,
           // datatokenAddress,
         )
@@ -506,7 +506,7 @@ const buyAndOrder = async (
   accessDetails = {}
   accessDetails.type = 'free'
   // temporary until subgraph works again
-  if (accessDetails == undefined ) {
+  if (accessDetails === undefined ) {
     accessDetails = {}
     accessDetails.type = 'free'
     // accessDetails.type = 'fixed'
@@ -706,6 +706,7 @@ async function getComputeStatus(computeJobId: any, DATASET_DDO: any) {
   )
   // assert(jobStatus, 'Cannot retrieve compute status!')
   console.log(jobStatus)
+  return jobStatus
 
 }
     
@@ -714,7 +715,7 @@ async function getComputeStatus(computeJobId: any, DATASET_DDO: any) {
    * automatically when your component should be re-rendered.
    */
 class RunCompute extends StreamlitComponentBase<State> {
-  public state = { computeJobId: "No compute job", isFocused: false }
+  public state = { computeJobId: "No compute job", computeStatus: "No Status", isFocused: false }
 
     public render = (): ReactNode => {
       // Arguments that are passed to the plugin in Python are accessible
@@ -761,18 +762,23 @@ class RunCompute extends StreamlitComponentBase<State> {
   
     /** Click handler for our "Click Me!" button. */
     private onClicked = async (): Promise<void> => {
-      if (this.props.args["key"] == "c2d") {
+      if (this.props.args["key"] === "c2d") {
         const transaction: any = await runCompute(this.props.args["data_did"], this.props.args["algo_did"], this.props.args["user_address"])
         this.setState(
           () => ({ computeJobId: transaction }),
           () => Streamlit.setComponentValue(this.state.computeJobId)
         )
-      } else if (this.props.args["key"] == "status") {
-        if (this.state.computeJobId != "No compute job") {
+      } else if (this.props.args["key"] === "status") {
+        if (this.state.computeJobId !== "No compute job") {
           const status: any = await getComputeStatus(this.state.computeJobId[0], this.state.computeJobId[1])
+          this.setState(
+            () => ({ computeStatus: status }),
+            () => Streamlit.setComponentValue(this.state.computeStatus)
+          )
         } else {
           const status: any = "You need to start a compute job first"
           console.log("You need to start a compute job first")
+          console.log("Compute Job state is ", this.state.computeJobId)
         }
       }
       // Increment state.numClicks, and pass the new value back to
