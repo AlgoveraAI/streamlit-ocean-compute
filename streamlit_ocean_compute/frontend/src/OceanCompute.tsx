@@ -32,7 +32,7 @@ import {
 import assert from "assert"
 
 interface State {
-    computeResult: any
+    computeJobId: any
     isFocused: boolean
 }
   
@@ -714,7 +714,7 @@ async function getComputeStatus(computeJobId: any, DATASET_DDO: any) {
    * automatically when your component should be re-rendered.
    */
 class RunCompute extends StreamlitComponentBase<State> {
-  public state = { computeResult: "No compute result", isFocused: false }
+  public state = { computeJobId: "No compute job", isFocused: false }
 
     public render = (): ReactNode => {
       // Arguments that are passed to the plugin in Python are accessible
@@ -761,11 +761,20 @@ class RunCompute extends StreamlitComponentBase<State> {
   
     /** Click handler for our "Click Me!" button. */
     private onClicked = async (): Promise<void> => {
-      const transaction: any = await runCompute(this.props.args["data_did"], this.props.args["algo_did"], this.props.args["user_address"])
-      this.setState(
-        () => ({ computeResult: transaction }),
-        () => Streamlit.setComponentValue(this.state.computeResult)
-      )
+      if (this.props.args["key"] == "c2d") {
+        const transaction: any = await runCompute(this.props.args["data_did"], this.props.args["algo_did"], this.props.args["user_address"])
+        this.setState(
+          () => ({ computeJobId: transaction }),
+          () => Streamlit.setComponentValue(this.state.computeJobId)
+        )
+      } else if (this.props.args["key"] == "status") {
+        if (this.state.computeJobId != "No compute job") {
+          const status: any = await getComputeStatus(this.state.computeJobId[0], this.state.computeJobId[1])
+        } else {
+          const status: any = "You need to start a compute job first"
+          console.log("You need to start a compute job first")
+        }
+      }
       // Increment state.numClicks, and pass the new value back to
       // Streamlit via `Streamlit.setComponentValue`.
     }
