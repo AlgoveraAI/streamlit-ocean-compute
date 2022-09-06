@@ -502,9 +502,10 @@ const buyAndOrder = async (
     payerAccount,
   );
   console.log("accessDetails", accessDetails);
-
+  accessDetails = {}
+  accessDetails.type = 'free'
   // temporary until subgraph works again
-  if (accessDetails == undefined) {
+  if (accessDetails == undefined ) {
     accessDetails = {}
     accessDetails.type = 'free'
     // accessDetails.type = 'fixed'
