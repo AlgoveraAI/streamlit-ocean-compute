@@ -11,20 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from wallet_connect import wallet_connect
-from web3 import Web3
-from ocean_lib.config import Config
-from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
 
 
-# Ocean Search
-config = Config('./streamlit_ocean_compute/config.ini')
-ocean = Ocean(config)
-# st.write(f"Ocean network: {ocean.config.network_url}")
-
-_ocean_data = components.declare_component("ocean_data", url="http://localhost:3003/")
+_ocean_data = components.declare_component("ocean_compute", url="http://localhost:3003/")
 def ocean_data(label, did="", key=None, user_address=None, dt_did=None, alg_did=None, message="Run Compute", color="#3388FF", job_id="None"):
     """
     Wallet Connect component.
@@ -54,3 +43,18 @@ if data_did and algo_did:
     st.write(f"Compute Status is: {ocean_compute_button2}")
     ocean_compute_button3 = ocean_data(label="ocean_compute3", key="results", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Get Results", color="#77C063")
     st.write(f"Compute Results available here: {ocean_compute_button3}")
+
+def sample_compute():
+    st.header("Run Compute to Data")
+    data_did = st.text_input("Data DID: ", "")
+    algo_did = st.text_input("Algorithm DID: ", "")
+
+    if data_did and algo_did:
+        ocean_compute_button = ocean_data(label="ocean_compute", key="c2d", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Run Compute", color="#3388FF")
+        if isinstance(ocean_compute_button, list):
+            st.write(f"Compute started with job ID: {ocean_compute_button[0]}")
+        job_id = st.text_input("Compute Job ID: ", "")
+        ocean_compute_button2 = ocean_data(label="ocean_compute2", key="status", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Check Status", color="#A44CD3", job_id=job_id)
+        st.write(f"Compute Status is: {ocean_compute_button2}")
+        ocean_compute_button3 = ocean_data(label="ocean_compute3", key="results", user_address=user_address, dt_did=data_did, alg_did=algo_did, message="Get Results", color="#77C063")
+        st.write(f"Compute Results available here: {ocean_compute_button3}")
