@@ -397,15 +397,14 @@ async function handleOrder(
       console.log("Approving provider fee")
       console.log("provider fee", order.providerFee)
       // Approve provider fees if exists
-      if (order.providerFee && order.providerFee.providerFeeAmount) {
-        await datatoken.approve(
-          order.providerFee.providerFeeToken,
-          datatokenAddress,
-          order.providerFee.providerFeeAmount,
-          payerAccount
-        );
+      // if (order.providerFee && order.providerFee.providerFeeAmount) {
+        // await datatoken.approve(
+        //   order.providerFee.providerFeeToken,
+        //   datatokenAddress,
+        //   order.providerFee.providerFeeAmount,
+        //   payerAccount
+        // );
         const config = await getTestConfig(web3)
-
         await approveWei(
           web3,
           config,
@@ -415,7 +414,7 @@ async function handleOrder(
           order.providerFee.providerFeeAmount,
           // datatokenAddress,
         )
-      }
+      // }
     };
 
     // Return if order already valid, pay fees if neccessary
@@ -449,6 +448,7 @@ async function handleOrder(
       order.providerFee,
       consumeMarkerFee
     )
+    console.log("Service index when user already owns tokens: ", serviceIndex)
     return tx.transactionHash
   }
   // testing logs
@@ -485,15 +485,15 @@ const buyAndOrder = async (
 ) => {
   if (!order.providerFee)
     throw new Error("Undefined token for paying fees.");
-
+  console.log("Service index when user does not own tokens: ", serviceIndex)
   const orderParams: OrderParams = {
     consumer: consumerAccount,
     serviceIndex: serviceIndex,
     _providerFee: order.providerFee,
-    _consumeMarketFee:  { //consumeMarkerFee ??
-      consumeMarketFeeAddress: "0x0000000000000000000000000000000000000000",
+    _consumeMarketFee: { // consumeMarkerFee ??
+      consumeMarketFeeAddress: order.providerFee.providerFeeAddress, // previously "0x0000000000000000000000000000000000000000"
       consumeMarketFeeToken: order.providerFee.providerFeeToken,
-      consumeMarketFeeAmount: "0",
+      consumeMarketFeeAmount: order.providerFee.providerFeeAmount, // previously "0"
     },
   };
   console.log("ddo.accessDetails", ddo.accessDetails);
@@ -518,6 +518,7 @@ const buyAndOrder = async (
   switch (accessDetails?.type) {
 
     case "fixed": {
+      await approveProviderFee(); // test code
       if (!config.fixedRateExchangeAddress)
         throw new Error("Undefined exchange address - unable to purchase data token.");
 
@@ -562,12 +563,25 @@ const buyAndOrder = async (
       // Pay provider fee for running alg
       await approveProviderFee();
 
+      await datatoken.approve(
+        order.providerFee?.providerFeeToken,
+        datatokenAddress,
+        await amountToUnits(
+          web3,
+          order.providerFee?.providerFeeToken ?? "0",
+          "0",
+          18, // amountToUnits doesn't need web3 if decimals (18) are specified
+        ),
+        payerAccount
+      );
+
       const tx = await datatoken.buyFromDispenserAndOrder(
         datatokenAddress,
         payerAccount,
         orderParams,
         config.dispenserAddress
       );
+      
       return tx.transactionHash;
     }
     default: {
