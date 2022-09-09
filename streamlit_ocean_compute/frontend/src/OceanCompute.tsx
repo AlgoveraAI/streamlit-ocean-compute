@@ -21,6 +21,7 @@ import {
   ConfigHelper,
   ConsumeMarketFee,
   Datatoken,
+  downloadFileBrowser,
   FixedRateExchange,
   FreOrderParams,
   LoggerInstance,
@@ -569,6 +570,7 @@ async function runCompute(dataDid: string, algoDid: string , userAddress: string
 async function getComputeStatus(computeJobId: any, dataDid: any) {
   const config: any = await getTestConfig(web3)
   const aquarius = new Aquarius(config.metadataCacheUri)
+  console.log("Getting status for compute job ", computeJobId)
   // const resolvedDdoWith1mTimeout = await aquarius.waitForAqua(dataDid);
   const accounts = await window.ethereum.request({
     method: 'eth_requestAccounts',
@@ -588,7 +590,7 @@ async function getComputeStatus(computeJobId: any, dataDid: any) {
 }
 
 async function getResults(computeJobId: any) {
-  console.log("Getting results")
+  console.log("Getting results for job ", computeJobId)
   const config: any = await getTestConfig(web3)
   const accounts = await window.ethereum.request({
     method: 'eth_requestAccounts',
@@ -603,8 +605,8 @@ async function getResults(computeJobId: any) {
     computeJobId,
     0
   )
-
   console.log(`Compute results URL: ${downloadURL}`)
+  await downloadFileBrowser(downloadURL)
   return downloadURL
 }
      
@@ -667,12 +669,14 @@ class RunCompute extends StreamlitComponentBase<State> {
           () => Streamlit.setComponentValue(this.state.computeJobId)
         )
       } else if (this.props.args["key"] === "status") {
+        console.log("Job ID for results ", this.props.args["job_id"])
         const status: any = await getComputeStatus(this.props.args["job_id"], this.props.args["data_did"])
         this.setState(
             () => ({ computeStatus: status }),
             () => Streamlit.setComponentValue(this.state.computeStatus)
         )
       } else if (this.props.args["key"] === "results") {
+        console.log("Job ID for results ", this.props.args["job_id"])
         const results: any = await getResults(this.props.args["job_id"])
         this.setState(
           () => ({ computeResults: results }),
