@@ -437,8 +437,7 @@ async function handleOrder(
     const tokenBalance = await balance(web3, datatokenAddress, payerAccount);
     console.log("Datatoken balance", tokenBalance);
 
-  if (Number(tokenBalance) >= 1) {
-    console.log("User already owns the tokens, approving provider fee and starting order");
+    console.log("User owns the tokens, approving provider fee and starting order");
     await approveProviderFee();
     const tx = await datatoken.startOrder(
       datatokenAddress,
@@ -450,146 +449,8 @@ async function handleOrder(
     )
     console.log("Service index when user already owns tokens: ", serviceIndex)
     return tx.transactionHash
-  }
-  // testing logs
-  console.log("ddo", ddo)
-  console.log("datatokenAddress", datatokenAddress)
-  console.log("payerAccount", payerAccount)
-  console.log("consumerAccount", consumerAccount)
-  console.log("serviceIndex", serviceIndex)
-  console.log("order", order)
-  console.log("consumeMarkerFee", consumeMarkerFee)
-  // end testing logs
-  return await buyAndOrder(
-    ddo,
-    order,
-    datatokenAddress,
-    payerAccount,
-    consumerAccount,
-    serviceIndex,
-    approveProviderFee,
-    consumeMarkerFee
-  );
+
 }
-
-// buyAndOrder datasets, algorithms, compute
-const buyAndOrder = async (
-  ddo: Asset & { accessDetails?: AccessDetails },
-  order: ProviderComputeInitialize,
-  datatokenAddress: string,
-  payerAccount: string,
-  consumerAccount: string,
-  serviceIndex: number,
-  approveProviderFee: () => Promise<void>,
-  consumeMarkerFee?: ConsumeMarketFee
-) => {
-  if (!order.providerFee)
-    throw new Error("Undefined token for paying fees.");
-  console.log("Service index when user does not own tokens: ", serviceIndex)
-  const orderParams: OrderParams = {
-    consumer: consumerAccount,
-    serviceIndex: serviceIndex,
-    _providerFee: order.providerFee,
-    _consumeMarketFee: { // consumeMarkerFee ??
-      consumeMarketFeeAddress: order.providerFee.providerFeeAddress, // previously "0x0000000000000000000000000000000000000000"
-      consumeMarketFeeToken: order.providerFee.providerFeeToken,
-      consumeMarketFeeAmount: order.providerFee.providerFeeAmount, // previously "0"
-    },
-  };
-  console.log("ddo.accessDetails", ddo.accessDetails);
-  let accessDetails = ddo.accessDetails ?? await getAccessDetails(
-    ddo.chainId,
-    datatokenAddress,
-    3600, // TODO: valid until
-    payerAccount,
-  );
-  console.log("accessDetails", accessDetails);
-  accessDetails = {}
-  accessDetails.type = 'free'
-  // temporary until subgraph works again
-  if (accessDetails === undefined ) {
-    accessDetails = {}
-    accessDetails.type = 'free'
-    // accessDetails.type = 'fixed'
-    console.log("got here")
-  }
-  const config: any = await getTestConfig(web3)
-
-  switch (accessDetails?.type) {
-
-    case "fixed": {
-      await approveProviderFee(); // test code
-      if (!config.fixedRateExchangeAddress)
-        throw new Error("Undefined exchange address - unable to purchase data token.");
-
-      const orderPriceAndFees = await getOrderPriceAndFees(ddo, accessDetails, order.providerFee);
-      console.log("pricing is fixed")
-
-      // this assumes all fees are in ocean
-      await datatoken.approve(
-        order.providerFee?.providerFeeToken,
-        datatokenAddress,
-        await amountToUnits(
-          web3,
-          order.providerFee?.providerFeeToken ?? "0",
-          orderPriceAndFees.price,
-          18, // amountToUnits doesn't need web3 if decimals (18) are specified
-        ),
-        payerAccount
-      );
-
-      const freParams: FreOrderParams = {
-        exchangeContract: config.fixedRateExchangeAddress,
-        exchangeId: accessDetails.addressOrId,
-        maxBaseTokenAmount: orderPriceAndFees.price,
-        baseTokenAddress: order.providerFee?.providerFeeToken,
-        baseTokenDecimals: 18, // TODO: Here we assume 18 decimal token, might not be the case
-        swapMarketFee: "0",
-        marketFeeAddress: "0x0000000000000000000000000000000000000000",
-      };
-
-      const tx = await datatoken.buyFromFreAndOrder(
-        datatokenAddress,
-        payerAccount,
-        orderParams,
-        freParams
-      );
-      return tx.transactionHash;
-    }
-    case "free": {
-      if (!config.dispenserAddress)
-        throw new Error("undefined dispenser address - unable to purchase free data token.");
-
-      // Pay provider fee for running alg
-      await approveProviderFee();
-
-      await datatoken.approve(
-        order.providerFee?.providerFeeToken,
-        datatokenAddress,
-        await amountToUnits(
-          web3,
-          order.providerFee?.providerFeeToken ?? "0",
-          "0",
-          18, // amountToUnits doesn't need web3 if decimals (18) are specified
-        ),
-        payerAccount
-      );
-
-      const tx = await datatoken.buyFromDispenserAndOrder(
-        datatokenAddress,
-        payerAccount,
-        orderParams,
-        config.dispenserAddress
-      );
-      
-      return tx.transactionHash;
-    }
-    default: {
-      throw new Error("Data with unsupported access type");
-    }
-  }
-};
-
 
 // main function executed by the button
 async function runCompute(dataDid: string, algoDid: string , userAddress: string) {
