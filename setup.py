@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="streamlit-ocean-compute",
-    version="0.0.1",
+    version="0.0.2",
     author="AlgoveraAI",
     author_email="hello@algovera.ai",
     description="Streamlit component for running compute-to-data with Ocean Protocol",

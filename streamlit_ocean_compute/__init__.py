@@ -13,10 +13,10 @@ import numpy as np
 from wallet_connect import wallet_connect
 
 
-_ocean_data = components.declare_component("ocean_compute", url="http://localhost:3003/")
-# parent_dir = os.path.dirname(os.path.abspath(__file__))
-# build_dir = os.path.join(parent_dir, "frontend/build")
-# _ocean_data = components.declare_component("ocean_compute", path=build_dir)
+# _ocean_data = components.declare_component("ocean_compute", url="http://localhost:3003/")
+parent_dir = os.path.dirname(os.path.abspath(__file__))
+build_dir = os.path.join(parent_dir, "frontend/build")
+_ocean_data = components.declare_component("ocean_compute", path=build_dir)
 
 def ocean_data(label, did="", key=None, user_address=None, dt_did=None, alg_did=None, message="Run Compute", color="#3388FF", job_id="None"):
     """
